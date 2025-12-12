@@ -1,5 +1,5 @@
 # undergrad-microprocessors-asm
-# Z80 Assembly Language - Beginner's Guide
+# Z80 Assembly Language
 
 A comprehensive introduction to Z80 assembly programming covering registers, basic operations, and fundamental concepts.
 
@@ -498,3 +498,476 @@ LD A, (HL)      ; Indirect: A = byte at address in HL
 LD A, (IX+3)    ; Indexed: A = byte at address (IX + 3)
 ```
 
+
+# Intel 8085 Assembly Programming Guide
+
+## Overview
+
+The Intel 8085 is an 8-bit microprocessor introduced in 1976. It has a 16-bit address bus (can address 64KB of memory) and an 8-bit data bus. This guide covers the fundamental assembly language instructions you need to start programming the 8085.
+
+## Register Architecture
+
+The 8085 has several registers available for programming:
+
+### General Purpose Registers (8-bit)
+- **A (Accumulator)**: Primary register for arithmetic and logical operations
+- **B, C, D, E, H, L**: Can be used individually or in pairs (BC, DE, HL)
+
+### Special Purpose Registers
+- **SP (Stack Pointer)**: 16-bit register pointing to the top of the stack
+- **PC (Program Counter)**: 16-bit register containing the address of the next instruction
+- **Flags**: 5 flags indicating the status of operations
+  - **S (Sign)**: Set if result is negative (bit 7 = 1)
+  - **Z (Zero)**: Set if result is zero
+  - **AC (Auxiliary Carry)**: Used for BCD operations
+  - **P (Parity)**: Set if result has even parity
+  - **CY (Carry)**: Set if there's a carry/borrow
+
+## Basic Instruction Categories
+
+### 1. Data Transfer Instructions
+
+These instructions move data between registers, memory, and I/O ports.
+
+#### MOV (Move/Copy)
+Copies data from source to destination.
+
+**Syntax**: `MOV destination, source`
+
+**Examples**:
+```asm
+MOV A, B        ; Copy contents of B to A
+MOV C, A        ; Copy contents of A to C
+MOV M, A        ; Copy A to memory location pointed by HL
+MOV A, M        ; Copy from memory (HL) to A
+```
+
+**Key Points**:
+- Both registers remain unchanged except the destination
+- `M` represents memory location pointed to by HL register pair
+- Cannot do `MOV M, M` (illegal instruction)
+
+#### MVI (Move Immediate)
+Loads an 8-bit value directly into a register or memory.
+
+**Syntax**: `MVI destination, 8-bit-data`
+
+**Examples**:
+```asm
+MVI A, 25H      ; Load hexadecimal 25 into A
+MVI B, 10       ; Load decimal 10 into B
+MVI M, FFH      ; Load FFH into memory location (HL)
+```
+
+**Key Points**:
+- Data is specified directly in the instruction
+- Requires 2 bytes (opcode + data)
+
+#### LDA (Load Accumulator Direct)
+Loads accumulator from a specific memory address.
+
+**Syntax**: `LDA 16-bit-address`
+
+**Example**:
+```asm
+LDA 2050H       ; Load A from memory address 2050H
+```
+
+#### STA (Store Accumulator Direct)
+Stores accumulator contents to a specific memory address.
+
+**Syntax**: `STA 16-bit-address`
+
+**Example**:
+```asm
+STA 3000H       ; Store A to memory address 3000H
+```
+
+#### LDAX (Load Accumulator Indirect)
+Loads accumulator from memory address in BC or DE pair.
+
+**Examples**:
+```asm
+LDAX B          ; Load A from address in BC
+LDAX D          ; Load A from address in DE
+```
+
+#### STAX (Store Accumulator Indirect)
+Stores accumulator to memory address in BC or DE pair.
+
+**Examples**:
+```asm
+STAX B          ; Store A to address in BC
+STAX D          ; Store A to address in DE
+```
+
+#### LXI (Load Register Pair Immediate)
+Loads 16-bit data into a register pair.
+
+**Syntax**: `LXI pair, 16-bit-data`
+
+**Examples**:
+```asm
+LXI H, 2050H    ; HL = 2050H
+LXI B, 1234H    ; BC = 1234H
+LXI SP, 3FFFH   ; SP = 3FFFH (initialize stack)
+```
+
+### 2. Arithmetic Instructions
+
+#### ADD (Add to Accumulator)
+Adds register or memory contents to accumulator.
+
+**Syntax**: `ADD source`
+
+**Examples**:
+```asm
+ADD B           ; A = A + B
+ADD M           ; A = A + (HL)
+```
+
+**Flags Affected**: All (S, Z, AC, P, CY)
+
+#### ADI (Add Immediate)
+Adds 8-bit data to accumulator.
+
+**Syntax**: `ADI 8-bit-data`
+
+**Example**:
+```asm
+ADI 05H         ; A = A + 05H
+```
+
+#### ADC (Add with Carry)
+Adds register/memory and carry flag to accumulator.
+
+**Syntax**: `ADC source`
+
+**Example**:
+```asm
+ADC B           ; A = A + B + CY
+```
+
+**Use Case**: Multi-byte addition
+
+#### SUB (Subtract from Accumulator)
+Subtracts register or memory from accumulator.
+
+**Syntax**: `SUB source`
+
+**Examples**:
+```asm
+SUB C           ; A = A - C
+SUB M           ; A = A - (HL)
+```
+
+#### SUI (Subtract Immediate)
+Subtracts 8-bit data from accumulator.
+
+**Example**:
+```asm
+SUI 10H         ; A = A - 10H
+```
+
+#### INR (Increment)
+Increments register or memory by 1.
+
+**Syntax**: `INR destination`
+
+**Examples**:
+```asm
+INR A           ; A = A + 1
+INR B           ; B = B + 1
+INR M           ; (HL) = (HL) + 1
+```
+
+**Key Points**:
+- Does NOT affect Carry flag
+- Affects S, Z, AC, P flags
+
+#### DCR (Decrement)
+Decrements register or memory by 1.
+
+**Syntax**: `DCR destination`
+
+**Examples**:
+```asm
+DCR C           ; C = C - 1
+DCR M           ; (HL) = (HL) - 1
+```
+
+#### INX (Increment Register Pair)
+Increments 16-bit register pair by 1.
+
+**Examples**:
+```asm
+INX H           ; HL = HL + 1
+INX B           ; BC = BC + 1
+```
+
+**Key Point**: No flags affected
+
+#### DCX (Decrement Register Pair)
+Decrements 16-bit register pair by 1.
+
+**Examples**:
+```asm
+DCX H           ; HL = HL - 1
+DCX SP          ; SP = SP - 1
+```
+
+### 3. Logical Instructions
+
+#### ANA (AND with Accumulator)
+Performs bitwise AND with accumulator.
+
+**Syntax**: `ANA source`
+
+**Example**:
+```asm
+ANA B           ; A = A AND B
+```
+
+**Flags**: CY is reset, others affected
+
+#### ANI (AND Immediate)
+ANDs 8-bit data with accumulator.
+
+**Example**:
+```asm
+ANI 0FH         ; A = A AND 0FH (masks upper nibble)
+```
+
+#### ORA (OR with Accumulator)
+Performs bitwise OR with accumulator.
+
+**Example**:
+```asm
+ORA C           ; A = A OR C
+```
+
+#### ORI (OR Immediate)
+ORs 8-bit data with accumulator.
+
+**Example**:
+```asm
+ORI 80H         ; A = A OR 80H (sets bit 7)
+```
+
+#### XRA (XOR with Accumulator)
+Performs bitwise XOR with accumulator.
+
+**Example**:
+```asm
+XRA A           ; A = A XOR A = 00H (clear A)
+```
+
+**Common Trick**: `XRA A` is the fastest way to clear accumulator
+
+#### CMP (Compare with Accumulator)
+Compares register/memory with accumulator by subtracting (A - source).
+
+**Syntax**: `CMP source`
+
+**Examples**:
+```asm
+CMP B           ; Compare A with B
+CMP M           ; Compare A with (HL)
+```
+
+**Result**:
+- If A = source: Z flag = 1
+- If A < source: CY flag = 1
+- If A > source: CY flag = 0, Z flag = 0
+
+**Key Point**: Accumulator is NOT modified, only flags change
+
+#### CPI (Compare Immediate)
+Compares 8-bit data with accumulator.
+
+**Example**:
+```asm
+CPI 50H         ; Compare A with 50H
+```
+
+### 4. Branch Instructions
+
+#### JMP (Unconditional Jump)
+Jumps to specified address.
+
+**Syntax**: `JMP 16-bit-address`
+
+**Example**:
+```asm
+JMP 2000H       ; Jump to address 2000H
+```
+
+#### Conditional Jumps
+
+**JZ** (Jump if Zero): Jump if Z = 1
+```asm
+JZ LABEL        ; Jump if result was zero
+```
+
+**JNZ** (Jump if Not Zero): Jump if Z = 0
+```asm
+JNZ LABEL       ; Jump if result was not zero
+```
+
+**JC** (Jump if Carry): Jump if CY = 1
+```asm
+JC LABEL        ; Jump if carry occurred
+```
+
+**JNC** (Jump if No Carry): Jump if CY = 0
+```asm
+JNC LABEL       ; Jump if no carry
+```
+
+**JP** (Jump if Positive): Jump if S = 0
+```asm
+JP LABEL        ; Jump if result positive
+```
+
+**JM** (Jump if Minus): Jump if S = 1
+```asm
+JM LABEL        ; Jump if result negative
+```
+
+### 5. Stack Operations
+
+The stack grows downward in memory (SP decrements when pushing).
+
+#### PUSH
+Pushes register pair onto stack.
+
+**Syntax**: `PUSH pair`
+
+**Example**:
+```asm
+PUSH B          ; Push BC onto stack
+                ; (SP-1) = B, (SP-2) = C, SP = SP - 2
+```
+
+#### POP
+Pops from stack into register pair.
+
+**Example**:
+```asm
+POP D           ; Pop into DE
+                ; E = (SP), D = (SP+1), SP = SP + 2
+```
+
+### 6. Subroutine Instructions
+
+#### CALL
+Calls a subroutine at specified address.
+
+**Syntax**: `CALL 16-bit-address`
+
+**Example**:
+```asm
+CALL DELAY      ; Call subroutine at DELAY
+```
+
+**What Happens**:
+1. Push current PC onto stack
+2. Load new address into PC
+
+#### RET (Return from Subroutine)
+Returns from subroutine.
+
+**Example**:
+```asm
+RET             ; Pop address from stack into PC
+```
+
+### 7. Special Instructions
+
+#### HLT (Halt)
+Stops processor execution.
+
+**Example**:
+```asm
+HLT             ; Stop execution
+```
+
+#### NOP (No Operation)
+Does nothing, used for timing delays.
+
+**Example**:
+```asm
+NOP             ; Waste one instruction cycle
+```
+
+## Number Systems
+
+The 8085 uses different number representations:
+
+- **Hexadecimal**: Suffix with `H` (e.g., `2AH`, `FFH`)
+- **Decimal**: No suffix (e.g., `42`, `255`)
+- **Binary**: Suffix with `B` (e.g., `10101010B`)
+
+## Memory Addressing Modes
+
+1. **Direct**: Address specified in instruction (`LDA 2050H`)
+2. **Indirect**: Address in register pair (`MOV A, M`)
+3. **Immediate**: Data in instruction (`MVI A, 25H`)
+4. **Register**: Register to register (`MOV A, B`)
+
+## Common Programming Patterns
+
+### Adding Two Numbers
+```asm
+MVI A, 15H      ; Load first number
+MVI B, 20H      ; Load second number
+ADD B           ; A = A + B = 35H
+```
+
+### Finding Sum of Array
+```asm
+LXI H, 2050H    ; Point to array start
+MVI C, 05H      ; Counter = 5 elements
+XRA A           ; Clear accumulator (sum = 0)
+LOOP: ADD M     ; Add array element to sum
+INX H           ; Point to next element
+DCR C           ; Decrement counter
+JNZ LOOP        ; Repeat if counter != 0
+```
+
+### Comparing Two Numbers
+```asm
+LDA 2050H       ; Load first number
+MOV B, A        ; Save it
+LDA 2051H       ; Load second number
+CMP B           ; Compare with first
+JZ EQUAL        ; Jump if equal
+JC LESS         ; Jump if A < B
+; Otherwise A > B
+```
+
+## Tips for Beginners
+
+1. **Always initialize registers** before using them
+2. **Use meaningful labels** for addresses and loops
+3. **Initialize stack pointer** at the beginning of your program
+4. **Remember the HL pair** is your main pointer to memory
+5. **XRA A** is faster than `MVI A, 00H` to clear accumulator
+6. **INR/DCR don't affect carry flag** - use carefully in loops
+7. **Compare operations modify flags, not accumulator**
+
+## Example: Complete Program Structure
+
+```asm
+        ORG 2000H       ; Program starts at 2000H
+        LXI SP, 3FFFH   ; Initialize stack pointer
+        
+        ; Your code here
+        MVI A, 10H
+        MVI B, 20H
+        ADD B
+        STA 3000H       ; Store result
+        
+        HLT             ; Stop execution
+        END             ; End of program
+```
